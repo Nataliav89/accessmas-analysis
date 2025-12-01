@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AccessMás Analysis</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 24px; color: #fff; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { font-size: 28px; color: #00d9a5; margin-bottom: 8px; }
+    .header p { color: #a0aec0; font-size: 14px; }
+    .tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+    .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 12px 32px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .tab-btn:hover { background: rgba(255,255,255,0.1); }
+    .tab-btn.active { background: rgba(0, 217, 165, 0.2); border-color: #00d9a5; color: #00d9a5; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); }
+    .card.full-width { grid-column: 1 / -1; }
+    .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .icon-green { background: rgba(0, 217, 165, 0.2); }
+    .icon-yellow { background: rgba(255, 193, 7, 0.2); }
+    .icon-red { background: rgba(239, 68, 68, 0.2); }
+    .icon-blue { background: rgba(66, 153, 225, 0.2); }
+    .icon-purple { background: rgba(159, 122, 234, 0.2); }
+    .card-title { font-size: 16px; font-weight: 600; }
+    .card-title.green { color: #00d9a5; }
+    .card-title.yellow { color: #ffc107; }
+    .card-title.red { color: #ef4444; }
+    .card-title.blue { color: #4299e1; }
+    .card-title.purple { color: #9f7aea; }
+    .item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .item:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
+    .item-icon.check { background: rgba(0, 217, 165, 0.2); color: #00d9a5; }
+    .item-icon.warn { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .item-icon.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .item-icon.idea { background: rgba(66, 153, 225, 0.2); color: #4299e1; }
+    .item-icon.purple { background: rgba(159, 122, 234, 0.2); color: #9f7aea; }
+    .item-content h4 { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+    .item-content p { font-size: 13px; color: #a0aec0; line-height: 1.5; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .metrics.three-col { grid-template-columns: repeat(3, 1fr); }
+    .metric { text-align: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+    .metric-value { font-size: 28px; font-weight: 700; color: #00d9a5; }
+    .metric-label { font-size: 12px; color: #a0aec0; margin-top: 4px; }
+    .comparison-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 12px; }
+    .comparison-row:last-child { border-bottom: none; }
+    .comparison-label { font-size: 13px; color: #a0aec0; flex: 1; }
+    .comparison-values { display: flex; gap: 12px; }
+    .comparison-value { text-align: center; min-width: 70px; }
+    .comparison-value span { display: block; font-size: 10px; color: #718096; margin-bottom: 4px; }
+    .comparison-value strong { font-size: 13px; }
+    .comparison-value.accessmas strong { color: #00d9a5; }
+    .comparison-value.mybambu strong { color: #4299e1; }
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      .header h1 { font-size: 22px; }
+      .tabs { flex-direction: column; align-items: center; }
+      .tab-btn { width: 100%; max-width: 280px; text-align: center; }
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 20px; }
+      .card.full-width { grid-column: 1; }
+      .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .metrics.three-col { grid-template-columns: repeat(3, 1fr); }
+      .metric { padding: 12px 8px; }
+      .metric-value { font-size: 22px; }
+      .metric-label { font-size: 10px; }
+      .comparison-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .comparison-values { width: 100%; justify-content: space-around; }
+      .comparison-value { flex: 1; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AccessMás Takeaways</h1>
+    <p>UX & Operational Analysis vs. MyBambu</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('account')">Account Opening</button>
+    <button class="tab-btn" onclick="showTab('imt')">International Money Transfer</button>
+  </div>
+
+  <!-- ACCOUNT OPENING TAB -->
+  <div id="account" class="tab-content active">
+    <div class="grid">
+      <div class="card full-width">
+        <div class="metrics three-col">
+          <div class="metric"><div class="metric-value">~18</div><div class="metric-label">Total Screens</div></div>
+          <div class="metric"><div class="metric-value">2-4</div><div class="metric-label">Fields per Screen</div></div>
+          <div class="metric"><div class="metric-value">2</div><div class="metric-label">Account Tiers</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-green">✓</div><div class="card-title green">Strengths</div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Language Selection First</h4><p>Spanish/English choice upfront sends a strong signal to Latino users.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Chunked Data Entry</h4><p>"One thing per screen" reduces cognitive load and feels manageable.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Tiered Account Options</h4><p>Remittance Only vs Full Wallet lets users start with lighter KYC.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Latino Naming Support</h4><p>Second last name field and "This matches my ID" checkbox.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Clear ID Acceptance</h4><p>Visual display of accepted IDs with country flags builds confidence.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-yellow">!</div><div class="card-title yellow">Opportunities</div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Address Autocomplete</h4><p>MyBambu uses Google Places with validation. Reduces errors.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Upfront Requirements List</h4><p>MyBambu shows what's needed before starting. Sets expectations.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Processing Transparency</h4><p>MyBambu shows verification checklist. Reduces anxiety during wait.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Biometric Option</h4><p>Face ID prompt for faster future logins. Improves retention UX.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Transaction PIN</h4><p>MyBambu's 4-digit security code adds fraud protection layer.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-blue">💡</div><div class="card-title blue">Quick Wins</div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Add Progress Indicator</h4><p>Show step count or progress bar to help users understand progress.</p></div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Estimated Time</h4><p>Add "Takes ~5 minutes" messaging like MyBambu to set expectations.</p></div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Verification Status Screen</h4><p>Replace generic "Processing" with step-by-step status indicators.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-purple">⚖</div><div class="card-title purple">Side-by-Side</div></div>
+        <div class="comparison-row"><div class="comparison-label">Form Approach</div><div class="comparison-values"><div class="comparison-value accessmas"><span>AccessMás</span><strong>Chunked</strong></div><div class="comparison-value mybambu"><span>MyBambu</span><strong>Consolidated</strong></div></div></div>
+        <div class="comparison-row"><div class="comparison-label">ID Verification</div><div class="comparison-values"><div class="comparison-value accessmas"><span>AccessMás</span><strong>Mid-flow</strong></div><div class="comparison-value mybambu"><span>MyBambu</span><strong>End</strong></div></div></div>
+        <div class="comparison-row"><div class="comparison-label">Permissions</div><div class="comparison-values"><div class="comparison-value accessmas"><span>AccessMás</span><strong>Inline</strong></div><div class="comparison-value mybambu"><span>MyBambu</span><strong>Sequential</strong></div></div></div>
+        <div class="comparison-row"><div class="comparison-label">Address Entry</div><div class="comparison-values"><div class="comparison-value accessmas"><span>AccessMás</span><strong>Manual</strong></div><div class="comparison-value mybambu"><span>MyBambu</span><strong>Autocomplete</strong></div></div></div>
+        <div class="comparison-row"><div class="comparison-label">Language Select</div><div class="comparison-values"><div class="comparison-value accessmas"><span>AccessMás</span><strong>Yes ✓</strong></div><div class="comparison-value mybambu"><span>MyBambu</span><strong>No</strong></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMT TAB -->
+  <div id="imt" class="tab-content">
+    <div class="grid">
+      <div class="card full-width">
+        <div class="metrics">
+          <div class="metric"><div class="metric-value">8+</div><div class="metric-label">Screens to Complete</div></div>
+          <div class="metric"><div class="metric-value">3</div><div class="metric-label">Delivery Methods</div></div>
+          <div class="metric"><div class="metric-value">8</div><div class="metric-label">Destination Countries</div></div>
+          <div class="metric"><div class="metric-value">5</div><div class="metric-label">Critical Fixes</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-green">✓</div><div class="card-title green">Strengths</div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Clear Progress Indicator</h4><p>Visual 25-50-75-100% stepper keeps users oriented throughout.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Multiple Delivery Methods</h4><p>Cash Pickup, Bank Deposit, Mobile Wallet serve different needs.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Favorites & Quick Transfer</h4><p>Saved recipients with pre-filled details enable faster repeats.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Transparent Cancellation</h4><p>30-minute window clearly communicated with refund expectations.</p></div></div>
+        <div class="item"><div class="item-icon check">✓</div><div class="item-content"><h4>Promotional Visibility</h4><p>"Free 4 Transfers" offer and Check Promotions CTA visible.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-red">!</div><div class="card-title red">Critical Issues</div></div>
+        <div class="item"><div class="item-icon error">!</div><div class="item-content"><h4>Typos in UI</h4><p>"Recepient" → Recipient, "Jhon" → John. Damages credibility.</p></div></div>
+        <div class="item"><div class="item-icon error">!</div><div class="item-content"><h4>State/City Fields Swapped</h4><p>"Asheville" as State, "North Carolina" as City — incorrect.</p></div></div>
+        <div class="item"><div class="item-icon error">!</div><div class="item-content"><h4>Inconsistent Exchange Rates</h4><p>16.97 vs 12.50 MXN/USD in different screens — confusing.</p></div></div>
+        <div class="item"><div class="item-icon error">!</div><div class="item-content"><h4>Vague Field Labels</h4><p>"Field 2" and "Field 3" in Additional Info — not descriptive.</p></div></div>
+        <div class="item"><div class="item-icon error">!</div><div class="item-content"><h4>Country Code Mismatch</h4><p>+52 (Mexico) shown for Colombia — should be +57.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-yellow">★</div><div class="card-title yellow">Opportunities</div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Delivery Time Estimates</h4><p>Show arrival time per method (Bank: 1-2 days, Cash: Same day).</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Rate Lock Indicator</h4><p>Clarify how long the exchange rate is valid to reduce anxiety.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Smart Recipient Suggestions</h4><p>Surface frequent recipients at amount entry, not just Favorites.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Earlier Fee Transparency</h4><p>Show estimated total before recipient entry screens.</p></div></div>
+        <div class="item"><div class="item-icon warn">→</div><div class="item-content"><h4>Push Notifications</h4><p>Proactive status updates vs. requiring History screen checks.</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-blue">💡</div><div class="card-title blue">Quick Wins</div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Fix All Typos</h4><p>Search and replace "Recepient" across all screens.</p></div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Correct Address Fields</h4><p>Swap State/City labels and validate formats per country.</p></div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Dynamic Country Codes</h4><p>Auto-populate +57 Colombia, +52 Mexico based on destination.</p></div></div>
+        <div class="item"><div class="item-icon idea">→</div><div class="item-content"><h4>Rename Generic Fields</h4><p>Replace "Field 2/3" with "Relationship" or "Purpose Details".</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon icon-purple">⚡</div><div class="card-title purple">UX Friction Points</div></div>
+        <div class="item"><div class="item-icon purple">◈</div><div class="item-content"><h4>Too Many Steps</h4><p>8+ screens for new recipients. Consider consolidating.</p></div></div>
+        <div class="item"><div class="item-icon purple">◈</div><div class="item-content"><h4>$0.00 Default Display</h4><p>Recipient Receives shows $0.00 before entry — feels broken.</p></div></div>
+        <div class="item"><div class="item-icon purple">◈</div><div class="item-content"><h4>No Inline Validation</h4><p>Error states not visible in designs — verify implementation.</p></div></div>
+        <div class="item"><div class="item-icon purple">◈</div><div class="item-content"><h4>Cancel Button Placement</h4><p>Prominent on completion screen — risk of accidental taps.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
